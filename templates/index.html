@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pencarian Dokumen</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="/static/images/usu.png" alt="USU Logo" class="logo">
+                <div class="title-container">
+                    <h1>SISTEM PENCARIAN DOKUMEN</h1>
+                    <h2>WINA OCTARIA SARAGIH</h2>
+                    <h3>NIM 201401110</h3>
+                </div>
+                <img src="/static/images/fasilkom.png" alt="Fasilkom Logo" class="logo">
+            </div>
+        </header>
+
+        <div class="supervisor-section">
+            <h3>Dosen Pembimbing :</h3>
+            <div class="supervisors">
+                <div class="supervisor">
+                    <p>Dr. Amalia, S.T., M.T.</p>
+                    <p>NIP. 197812212014042001</p>
+                </div>
+                <div class="supervisor">
+                    <p>Dewi Sartika Br Ginting S.Kom., M.Kom</p>
+                    <p>NIP. 199005042019032023</p>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+        <div class="notification-container">
+            {% for message in messages %}
+            <div class="notification {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+                <span class="close-notification">&times;</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="search-section">
+            <form action="/search/" method="post" enctype="multipart/form-data" class="search-form">
+                {% csrf_token %}
+                <button type="button" id="addDocumentBtn" class="add-btn">+ Tambah Dokumen</button>
+                <div class="search-input">
+                    <input type="file" name="image" id="imageInput" accept="image/*" class="file-input">
+                    <label for="imageInput" class="file-label">Choose picture</label>
+                    <span id="fileName">No file selected</span>
+                    <button type="submit" class="search-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if ocr_text %}
+        <div class="ocr-results">
+            <h3>Hasil OCR:</h3>
+            <div class="ocr-text">{{ ocr_text }}</div>
+        </div>
+        {% endif %}
+
+        {% if results %}
+        <div class="search-results">
+            <h3>Hasil Pencarian:</h3>
+            <div class="documents-grid">
+                {% for result in results %}
+                <div class="document-card">
+                    <div class="document-title">{{ result.title }}</div>
+                    <div class="document-relevance">Relevansi: {{ result.similarity|floatformat:2 }}</div>
+                    <div class="document-actions">
+                        <a href="/download_document/{{ result.id }}/" class="download-icon" title="Download">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </a>
+                        <a href="/delete_document/{{ result.id }}/" class="delete-icon" title="Delete" onclick="return confirm('Apakah Anda yakin ingin menghapus dokumen ini?')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="documents-section">
+            <h3>Dokumen:</h3>
+            <div class="documents-grid">
+                {% for document in documents %}
+                <div class="document-card">
+                    <div class="document-title">{{ document.document_name }}</div>
+                    <div class="document-actions">
+                        <a href="/download_document/{{ document.id }}/" class="download-icon" title="Download">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </a>
+                        <a href="/delete_document/{{ document.id }}/" class="delete-icon" title="Delete" onclick="return confirm('Apakah Anda yakin ingin menghapus dokumen ini?')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>&copy; 2025. Hak cipta dilindungi.</p>
+        </footer>
+    </div>
+
+    <!-- Add Document Modal -->
+    <div id="addDocumentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Tambah Dokumen</h2>
+            <form action="/add_document/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="documentInput">Pilih file PDF (Maks. 200KB):</label>
+                    <input type="file" name="document" id="documentInput" accept=".pdf" required>
+                </div>
+                <button type="submit" class="submit-btn">Tambah</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
